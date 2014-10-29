@@ -73,7 +73,62 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
+        """
+        variables used:
+        distance to closest food
+        distance to active ghosts
+        distance to scared ghost
+        number of food pellets remaining
+        number of power pellets remaining
+        """
+        currentScore = scoreEvaluationFunction(successorGameState)
+        foodList = newFood.asList()
+        numFood = len(foodList) #number of food pellets remaining
+        numPower = len(successorGameState.getCapsules()) #number of power pellets remaining
+        
+        """distance to the closest food pellet"""
+        distToClosestFood = 100     #changed, because 99999 was causing code to hang
+        for food in foodList:
+            mhDist = util.manhattanDistance(newPos, food)
+            distToClosestFood = min(distToClosestFood, mhDist)
+        
+        """distance to the closest power pellet"""    
+        distToClosestPower = 100    #same reason for change
+        for power in successorGameState.getCapsules():
+            distToClosestPower = min(distToClosestPower, (util.manhattanDistance(newPos, power)))
+            
+        if distToClosestPower == 100:   #incase there is no power pellet in example, elimintes this from equation
+              distToClosestPower = 0
+            
+        activeGhosts, scaredGhosts = [], []
+        
+        """Distinguish between active and scared ghosts"""        
+        for ghostState in newGhostStates:
+            if not ghostState.scaredTimer:
+                activeGhosts.append(ghostState)
+            else:
+                scaredGhosts.append(ghostState)
+        
+        """get the closest distance to active and scared ghosts"""
+        distToClosestActiveGhost = 100      #read above
+        for active in activeGhosts:
+            distToClosestActiveGhost = min(util.manhattanDistance(active.getPosition(), newPos), distToClosestActiveGhost)
+            if distToClosestActiveGhost == 0:
+                distToClosestActiveGhost = 1 #prevents float division by zero
+        
+        distToClosestScaredGhost = 100      #why is this an issue
+        for scared in scaredGhosts:
+            distToClosestScaredGhost = min(util.manhattanDistance(scared.getPosition(), newPos), distToClosestScaredGhost)
+        
+       
+             
+        score = currentScore - (distToClosestFood) +  (distToClosestActiveGhost)
+                   
+                   
+        # print (currentScore - (distToClosestFood) + abs(distToClosestActiveGhost - 2) )
+       # print( "s" + str( currentScore - ((distToClosestFood)) + ((distToClosestActiveGhost) + 1 ) - (distToClosestPower - .5) ) )
+
+        return score
         return successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
