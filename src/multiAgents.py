@@ -86,6 +86,7 @@ class ReflexAgent(Agent):
         numFood = len(foodList) #number of food pellets remaining
         numPower = len(successorGameState.getCapsules()) #number of power pellets remaining
         
+        score = numFood * -100
         """distance to the closest food pellet"""
         distToClosestFood = 100     #changed, because 99999 was causing code to hang
         for food in foodList:
@@ -116,13 +117,13 @@ class ReflexAgent(Agent):
             if distToClosestActiveGhost == 0:
                 distToClosestActiveGhost = 1 #prevents float division by zero
         
-        distToClosestScaredGhost = 100      #why is this an issue
+        """distToClosestScaredGhost = 100      #why is this an issue
         for scared in scaredGhosts:
-            distToClosestScaredGhost = min(util.manhattanDistance(scared.getPosition(), newPos), distToClosestScaredGhost)
+            distToClosestScaredGhost = min(util.manhattanDistance(scared.getPosition(), newPos), distToClosestScaredGhost)"""
         
        
              
-        score = currentScore - (distToClosestFood) +  (distToClosestActiveGhost)
+        score += currentScore - (distToClosestFood) +  (distToClosestActiveGhost)
                    
                    
         # print (currentScore - (distToClosestFood) + abs(distToClosestActiveGhost - 2) )
