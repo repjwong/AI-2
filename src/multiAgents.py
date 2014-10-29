@@ -184,6 +184,53 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
+        numGhosts = gameState.getNumAgents()-1
+        PACMAN = 0
+        
+        def dispatch(gameState, index, depth, numGhosts):
+            if gameState.isWin() or gameState.isLose() or depth == 0:
+                return self.evaluationFunction(gameState)
+            elif index == PACMAN:
+                return max_value(gameState, index, depth, numGhosts)
+            else: return min_value(gameState, index, depth, numGhosts)
+        
+        """PACMAN"""    
+        def max_value(gameState, agentIndex, depth, numGhosts):
+            score = float("-inf")
+            legalActions = gameState.getLegalActions(agentIndex)
+            bestAction = Directions.STOP
+            if agentIndex == numGhosts:
+                nextIndex = PACMAN
+            else:
+                nextIndex = agentIndex + 1
+            for action in legalActions:
+                nextState = gameState.generateSuccessor(agentIndex, action)
+                prevScore = score
+                score = max(score, dispatch(nextState, nextIndex, depth-1, numGhosts))
+                if score > prevScore:
+                    bestAction = action
+            return bestAction
+                
+            
+        """Ghosts"""    
+        def min_value(gameState, agentIndex, depth, numGhosts):
+            score = float("inf")
+            legalActions = gameState.getLegalActions(agentIndex)
+            bestAction = Directions.STOP
+            if agentIndex == numGhosts:
+                nextIndex = 0
+            else:
+                nextIndex = agentIndex + 1
+            for action in legalActions:
+                nextState = gameState.generateSuccessor(agentIndex, action)
+                prevScore = score
+                score = min(score, dispatch(nextState, nextIndex, depth-1, numGhosts))
+                if score > prevScore:
+                    bestAction = action 
+            return bestAction
+        
+            
+        return dispatch(gameState, PACMAN, self.depth, numGhosts)
         util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
