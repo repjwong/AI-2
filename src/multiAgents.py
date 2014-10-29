@@ -184,54 +184,58 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        numGhosts = gameState.getNumAgents()-1
-        PACMAN = 0
+        numAgents = gameState.getNumAgents()
+        PACMAN = 0 #index of PACMAN
         
-        def dispatch(gameState, index, depth, numGhosts):
+        def dispatch(gameState, index, depth):
+            #when the index equals the number of ghosts, reset back to PACMAN and decrease the depth by 1
+            if index == numAgents -1:
+                depth -= 1
+                index = PACMAN
+            
+            #Either PACMAN wins or the ghosts win or we have reached our depth so return the score   
             if gameState.isWin() or gameState.isLose() or depth == 0:
                 return self.evaluationFunction(gameState)
+            #max agent
             elif index == PACMAN:
-                return max_value(gameState, index, depth, numGhosts)
-            else: return min_value(gameState, index, depth, numGhosts)
+                return max_value(gameState, index, depth)
+            #min value
+            else: return min_value(gameState, index, depth)
         
         """PACMAN"""    
-        def max_value(gameState, agentIndex, depth, numGhosts):
-            score = float("-inf")
+        def max_value(gameState, agentIndex, depth):
+            v = float("-inf")
             legalActions = gameState.getLegalActions(agentIndex)
-            bestAction = Directions.STOP
-            if agentIndex == numGhosts:
-                nextIndex = PACMAN
-            else:
-                nextIndex = agentIndex + 1
+            #evaluate each possible action for PACMAN
             for action in legalActions:
-                nextState = gameState.generateSuccessor(agentIndex, action)
-                prevScore = score
-                score = max(score, dispatch(nextState, nextIndex, depth-1, numGhosts))
-                if score > prevScore:
-                    bestAction = action
-            return bestAction
+                successor = gameState.generateSuccessor(agentIndex, action)
+                v = max(v, dispatch(successor, agentIndex + 1, depth)) #increase the agent index here
+            return v
                 
             
         """Ghosts"""    
-        def min_value(gameState, agentIndex, depth, numGhosts):
-            score = float("inf")
+        def min_value(gameState, agentIndex, depth):
+            v = float("inf")
             legalActions = gameState.getLegalActions(agentIndex)
-            bestAction = Directions.STOP
-            if agentIndex == numGhosts:
-                nextIndex = 0
-            else:
-                nextIndex = agentIndex + 1
+            #evaluate each possible action for a ghost
             for action in legalActions:
-                nextState = gameState.generateSuccessor(agentIndex, action)
-                prevScore = score
-                score = min(score, dispatch(nextState, nextIndex, depth-1, numGhosts))
-                if score > prevScore:
-                    bestAction = action 
-            return bestAction
+                successor = gameState.generateSuccessor(agentIndex, action)
+                v = min(v, dispatch(successor, agentIndex+1, depth))
+            return v
+        #this runs first to start the original dispatch
+        legalActions = gameState.getLegalActions(PACMAN)
+        bestScore = float("-inf")
+        bestAction = None
         
-            
-        return dispatch(gameState, PACMAN, self.depth, numGhosts)
-        util.raiseNotDefined()
+        for action in legalActions:
+            successor = gameState.generateSuccessor(PACMAN, action)
+            score = dispatch(successor, 1, self.depth) #first dispatch
+            #the best score will be associated with an action
+            if score > bestScore:
+                bestScore = score
+                bestAction = action
+           
+        return bestAction
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
